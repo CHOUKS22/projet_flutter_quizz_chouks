@@ -1,0 +1,36 @@
+name: Firequizz
+description: "Firequizz."
+publish_to: 'none' 
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.8.1
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  sqflite: ^2.3.0
+  flutter_native_splash: ^2.3.5
+  path_provider: ^2.1.2
+  provider: ^6.1.2
+  flutter_animate: ^4.2.0
+  crypto: ^3.0.3
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/app_icon.png
+
+flutter_native_splash:
+  color: "#ffffff"
+  image: assets/app_icon.png
+  android: true
+  ios: true
+  fullscreen: true
