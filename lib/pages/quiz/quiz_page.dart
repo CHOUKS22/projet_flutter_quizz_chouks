@@ -43,11 +43,11 @@ class _QuizPageState extends State<QuizPage> {
     } else {
       final db = DatabaseHelper();
       await db.saveQuizScore(
-        userId: 1, 
+        userId: 1,
         score: score,
         category: widget.category,
         difficulty: widget.difficulty,
-        datePlayed: DateTime.now().toIso8601String(),
+        datePlayed: DateTime.now().toString(),
       );
       showDialog(
         context: context,
@@ -92,7 +92,13 @@ class _QuizPageState extends State<QuizPage> {
   Widget build(BuildContext context) {
     final q = widget.questions[currentQuestion];
     return Scaffold(
-      appBar: AppBar(title: Text(widget.title)),
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        title: Text(widget.title),
+        backgroundColor: const Color(0xFFFF4C0C),
+        foregroundColor: Colors.white,
+        elevation: 2,
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: AnimatedSwitcher(
@@ -100,41 +106,91 @@ class _QuizPageState extends State<QuizPage> {
           switchInCurve: Curves.easeIn,
           switchOutCurve: Curves.easeOut,
           transitionBuilder: (child, animation) {
-            // Animation simple : fade uniquement
             return child.animate(key: ValueKey(questionKey)).fadeIn(duration: 400.ms);
           },
-          child: Column(
+          child: Card(
             key: ValueKey(questionKey),
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                'Question ${currentQuestion + 1} / ${widget.questions.length}',
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 24),
-              Text(
-                q['question'],
-                style: const TextStyle(fontSize: 20),
-              ),
-              const SizedBox(height: 24),
-              ...List.generate(q['options'].length, (i) {
-                final option = q['options'][i];
-                return Container(
-                  margin: const EdgeInsets.symmetric(vertical: 6),
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: getOptionColor(option),
-                      foregroundColor: getTextColor(option),
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                    ),
-                    onPressed: () => checkAnswer(option),
-                    child: Text(option, style: TextStyle(fontSize: 16, color: getTextColor(option))),
+            color: Colors.white,
+            elevation: 6,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+            child: Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    children: [
+                      Icon(Icons.quiz, color: Color(0xFFFF0000), size: 28),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Question ${currentQuestion + 1} / ${widget.questions.length}',
+                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFFFF4C0C)),
+                      ),
+                    ],
                   ),
-                );
-              }),
-              const Spacer(),
-              Text('Score : $score', style: const TextStyle(fontSize: 18)),
-            ],
+                  const SizedBox(height: 24),
+                  Text(
+                    q['question'],
+                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w500, color: Color(0xFFFF0000)),
+                  ),
+                  const SizedBox(height: 24),
+                  ...List.generate(q['options'].length, (i) {
+                    final option = q['options'][i];
+                    final isCorrect = answered && option == q['answer'];
+                    final isWrong = answered && option == selectedOption && option != q['answer'];
+                    return Container(
+                      margin: const EdgeInsets.symmetric(vertical: 6),
+                      child: ElevatedButton.icon(
+                        icon: Icon(
+                          isCorrect
+                              ? Icons.check_circle
+                              : isWrong
+                                  ? Icons.cancel
+                                  : Icons.circle_outlined,
+                          color: isCorrect
+                              ? Colors.green
+                              : isWrong
+                                  ? Colors.red
+                                  : Colors.grey[400],
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: isCorrect
+                              ? Colors.green
+                              : isWrong
+                                  ? Colors.red
+                                  : Colors.white,
+                          foregroundColor: (isCorrect || isWrong)
+                              ? Colors.white
+                              : Colors.black,
+                          side: BorderSide(
+                            color: isCorrect
+                                ? Colors.green
+                                : isWrong
+                                    ? Colors.red
+                                    : Colors.grey.shade300,
+                            width: 2,
+                          ),
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          elevation: 0,
+                        ),
+                        onPressed: () => checkAnswer(option),
+                        label: Text(option, style: const TextStyle(fontSize: 16)),
+                      ),
+                    );
+                  }),
+                  const Spacer(),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Icon(Icons.emoji_events, color: Color(0xFFFF4C0C)),
+                      const SizedBox(width: 6),
+                      Text('Score : $score', style: const TextStyle(fontSize: 18, color: Color(0xFFFF4C0C), fontWeight: FontWeight.bold)),
+                    ],
+                  ),
+                ],
+              ),
+            ),
           ),
         ),
       ),

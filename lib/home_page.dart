@@ -105,10 +105,18 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text('Quiz Éducatif'),
-        backgroundColor: Colors.blue,
+        title: Row(
+          children: [
+            Image.asset('assets/app_icon.png', height: 32),
+            const SizedBox(width: 10),
+            const Text('Firequizz', style: TextStyle(fontWeight: FontWeight.bold)),
+          ],
+        ),
+        backgroundColor: Colors.deepOrange,
         foregroundColor: Colors.white,
+        elevation: 2,
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
@@ -122,76 +130,109 @@ class _HomePageState extends State<HomePage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Card(
-              elevation: 4,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              child: ListTile(
-                leading: const CircleAvatar(child: Icon(Icons.person)),
-                title: Text(widget.user.username),
-                subtitle: Text(widget.user.email),
+              Card(
+                elevation: 6,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                color: Colors.white,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 12),
+                  child: Row(
+                    children: [
+                      CircleAvatar(
+                        backgroundColor: Colors.deepOrange.shade100,
+                        child: const Icon(Icons.person, color: Colors.deepOrange),
+                      ),
+                      const SizedBox(width: 16),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(widget.user.username, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                          Text(widget.user.email, style: TextStyle(color: Colors.grey[700])),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
               ),
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton.icon(
-              icon: const Icon(Icons.history),
-              label: const Text('Voir l\'historique des scores'),
-              onPressed: () {
-                Navigator.pushNamed(context, AppRouter.historyRouter);
-              },
-            ),
-            const SizedBox(height: 24),
-            const Text(
-              'Choisissez une difficulté :',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            DropdownButton<String>(
-              value: selectedDifficulty,
-              items: difficulties
-                  .map((d) => DropdownMenuItem(
-                        value: d,
-                        child: Text(d),
-                      ))
-                  .toList(),
-              onChanged: (value) {
-                if (value != null) {
-                  setState(() {
-                    selectedDifficulty = value;
-                  });
-                }
-              },
-            ),
-            const SizedBox(height: 24),
-            const Text(
-              'Choisissez une catégorie :',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 16),
-            Expanded(
-              child: ListView.separated(
-                itemCount: categories.length,
-                separatorBuilder: (_, __) => const SizedBox(height: 12),
-                itemBuilder: (context, index) {
-                  final cat = categories[index];
-                  return ElevatedButton.icon(
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 18),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                    ),
-                    icon: Icon(_getIconData(cat['icon']!)),
-                    label: Text(cat['label']!, style: const TextStyle(fontSize: 16)),
-                    onPressed: () => onCategorySelected(
-                      context,
-                      cat['label']!,
-                      selectedDifficulty,
-                    ),
-                  );
+              const SizedBox(height: 16),
+              ElevatedButton.icon(
+                icon: const Icon(Icons.history),
+                label: const Text('Voir l\'historique des scores'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.deepOrange,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  elevation: 2,
+                ),
+                onPressed: () {
+                  Navigator.pushNamed(context, AppRouter.historyRouter);
                 },
               ),
-            ),
-          ],
+              const SizedBox(height: 24),
+              const Text(
+                'Choisissez une difficulté :',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.deepOrange),
+              ),
+              const SizedBox(height: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: Colors.deepOrange.shade100),
+                ),
+                child: DropdownButtonHideUnderline(
+                  child: DropdownButton<String>(
+                    value: selectedDifficulty,
+                    items: difficulties
+                        .map((d) => DropdownMenuItem(
+                              value: d,
+                              child: Text(d),
+                            ))
+                        .toList(),
+                    onChanged: (value) {
+                      if (value != null) {
+                        setState(() {
+                          selectedDifficulty = value;
+                        });
+                      }
+                    },
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
+              const Text(
+                'Choisissez une catégorie :',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.deepOrange),
+              ),
+              const SizedBox(height: 16),
+              Expanded(
+                child: ListView.separated(
+                  itemCount: categories.length,
+                  separatorBuilder: (_, __) => const SizedBox(height: 12),
+                  itemBuilder: (context, index) {
+                    final cat = categories[index];
+                    return Card(
+                      elevation: 3,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                      child: ListTile(
+                        leading: Icon(_getIconData(cat['icon']!), color: Colors.deepOrange, size: 32),
+                        title: Text(cat['label']!, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w500)),
+                        trailing: const Icon(Icons.arrow_forward_ios, color: Colors.deepOrange),
+                        onTap: () => onCategorySelected(
+                          context,
+                          cat['label']!,
+                          selectedDifficulty,
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
         ),
-      ),
-    );
+      );
   }
 }
