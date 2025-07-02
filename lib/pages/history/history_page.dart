@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import '../../fonctions/database_helper.dart';
 import '../../models/score_model.dart';
+import '../../models/user_model.dart';
 
 class HistoryPage extends StatefulWidget {
-  const HistoryPage({Key? key}) : super(key: key);
+  final UserModel? user;
+  const HistoryPage({Key? key, this.user}) : super(key: key);
 
   @override
   State<HistoryPage> createState() => _HistoryPageState();
@@ -16,15 +18,22 @@ class _HistoryPageState extends State<HistoryPage> {
   @override
   void initState() {
     super.initState();
-    _loadScores(); 
+    _loadScores();
   }
 
   Future<void> _loadScores() async {
-    final data = await DatabaseHelper().getAllScores();
-    setState(() {
-      _scores = data;
-      _isLoading = false;
-    });
+    if (widget.user != null && widget.user!.id != null) {
+      final data = await DatabaseHelper().getScoresByUser(widget.user!.id!);
+      setState(() {
+        _scores = data;
+        _isLoading = false;
+      });
+    } else {
+      setState(() {
+        _scores = [];
+        _isLoading = false;
+      });
+    }
   }
 
   @override

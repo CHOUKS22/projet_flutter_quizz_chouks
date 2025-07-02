@@ -166,7 +166,11 @@ class _HomePageState extends State<HomePage> {
                   elevation: 2,
                 ),
                 onPressed: () {
-                  Navigator.pushNamed(context, AppRouter.historyRouter);
+                  Navigator.pushNamed(
+                    context,
+                    AppRouter.historyRouter,
+                    arguments: widget.user,
+                  );
                 },
               ),
               const SizedBox(height: 24),

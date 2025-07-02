@@ -61,7 +61,8 @@ class AppRouter {
           settings: settings,
         );
       case historyRouter:
-        return MaterialPageRoute(builder: (_) => const HistoryPage());
+        final user = settings.arguments as UserModel?;
+        return MaterialPageRoute(builder: (_) => HistoryPage(user: user));
       default:
         return MaterialPageRoute(
           builder: (context) => Scaffold(
