@@ -36,8 +36,11 @@ class AppRouter {
       case homePageRouter:
         return MaterialPageRoute(builder: (_) => HomePage(user: settings.arguments as UserModel));
       case quizFootRouter:
+        // final args = settings.arguments as Map?;
+        // final user = args != null && args['user'] != null ? args['user'] as UserModel : null;
+        // final difficulty = args != null && args['difficulty'] != null ? args['difficulty'] as String : 'Facile';
         return MaterialPageRoute(
-          builder: (_) => const FootQuizPage(),
+          builder: (_) => FootQuizPage(),
           settings: settings,
         );
       case quizCultureGeneraleRouter:

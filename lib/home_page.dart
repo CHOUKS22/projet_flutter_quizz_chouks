@@ -81,7 +81,7 @@ class _HomePageState extends State<HomePage> {
     Navigator.pushNamed(
       context,
       routeName,
-      arguments: {'difficulty': difficulty},
+      arguments: {'difficulty': difficulty, 'user': widget.user},
     );
   }
 

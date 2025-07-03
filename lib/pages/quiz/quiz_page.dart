@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../fonctions/database_helper.dart';
 
-class QuizPage extends StatefulWidget {
+class QuizPage extends StatefulWidget { 
   final String title;
   final String category;
   final String difficulty;

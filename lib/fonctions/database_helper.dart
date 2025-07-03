@@ -19,11 +19,7 @@ class DatabaseHelper {
 
   Future<Database> _initDatabase() async {
     String path = join(await getDatabasesPath(), 'quiz_database.db');
-    return await openDatabase(
-      path,
-      version: 1,
-      onCreate: _onCreate,
-    );
+    return await openDatabase(path, version: 1, onCreate: _onCreate);
   }
 
   Future<void> _onCreate(Database db, int version) async {
@@ -48,7 +44,7 @@ class DatabaseHelper {
     ''');
   }
 
-  // CRUD Utilisateur (exemple)
+  //Register
   Future<int> insertUser(UserModel user) async {
     final db = await database;
     try {
@@ -76,7 +72,10 @@ class DatabaseHelper {
     if (maps.isNotEmpty) {
       UserModel user = UserModel.fromMap(maps.first);
       // Vérification du mot de passe hashé
-      bool isPasswordCorrect = PasswordHasher.verifyPassword(password, user.password);
+      bool isPasswordCorrect = PasswordHasher.verifyPassword(
+        password,
+        user.password,
+      );
       if (isPasswordCorrect) {
         return user;
       }
@@ -115,7 +114,10 @@ class DatabaseHelper {
   // Récupère tous les scores (pour l'historique)
   Future<List<ScoreModel>> getAllScores() async {
     final db = await database;
-    final List<Map<String, dynamic>> maps = await db.query('scores', orderBy: 'date_played DESC');
+    final List<Map<String, dynamic>> maps = await db.query(
+      'scores',
+      orderBy: 'date_played DESC',
+    );
     return List.generate(maps.length, (i) => ScoreModel.fromMap(maps[i]));
   }
 
