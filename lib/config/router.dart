@@ -1,105 +1,79 @@
-// Gestion des routes/navigation pour l'application
-
 import 'package:flutter/material.dart';
+import '../models/user_model.dart';
 import '../pages/forms/login.dart';
 import '../pages/forms/register.dart';
 import '../home_page.dart';
-import '../pages/quiz/foot_quiz.dart';
-import '../pages/quiz/culture_generale_quiz.dart';
-import '../pages/quiz/cuisine_quiz.dart';
-import '../pages/quiz/developpement_web_quiz.dart';
-import '../pages/quiz/anglais_quiz.dart';
+import '../pages/quiz/quiz_page.dart';
 import '../pages/history/history_page.dart';
-import '../models/user_model.dart';
+import '../pages/admin/admin_add_question_page.dart';
 
-// Classe pour gérer le routage de l'application Quiz
 class AppRouter {
+  static const String adminAddQuestionRouter = '/admin/add-question';
   static const String rootRouter = '/';
   static const String loginRouter = '/login';
   static const String registerRouter = '/register';
   static const String homePageRouter = '/home';
-  static const String quizFootRouter = '/quiz/foot';
-  static const String quizCultureGeneraleRouter = '/quiz/culture_generale';
-  static const String quizCuisineRouter = '/quiz/cuisine';
-  static const String quizDevWebRouter = '/quiz/developpement_web';
-  static const String quizAnglaisRouter = '/quiz/anglais';
+  static const String quizRouter = '/quiz';
   static const String historyRouter = '/history';
+  static const String adminAddCategoryRouter = '/admin/add-category';
 
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
     switch (settings.name) {
+      case adminAddQuestionRouter:
+        final user = settings.arguments;
+        if (user == null || user is! UserModel) {
+          return _errorRoute("Utilisateur non trouvé pour la page d'ajout de question");
+        }
+        return MaterialPageRoute(builder: (_) => AdminQuestionForm(user: user));
       case rootRouter:
-        return MaterialPageRoute(builder: (_) => LoginForm());
       case loginRouter:
-        return MaterialPageRoute(builder: (_) => LoginForm());
+        return MaterialPageRoute(builder: (_) => const LoginForm());
+      case adminAddCategoryRouter:
+        // Redirige vers la page d'ajout de question admin, nécessite un utilisateur
+        return _errorRoute("Navigation directe vers l'ajout de catégorie non supportée. Utilisez l'interface d'administration.");
       case registerRouter:
-        return MaterialPageRoute(builder: (_) => RegisterForm());
+        return MaterialPageRoute(builder: (_) => const RegisterForm());
       case homePageRouter:
-        return MaterialPageRoute(builder: (_) => HomePage(user: settings.arguments as UserModel));
-      case quizFootRouter:
-        // final args = settings.arguments as Map?;
-        // final user = args != null && args['user'] != null ? args['user'] as UserModel : null;
-        // final difficulty = args != null && args['difficulty'] != null ? args['difficulty'] as String : 'Facile';
+        final user = settings.arguments;
+        if (user == null || user is! UserModel) {
+          return _errorRoute("Utilisateur non trouvé pour la page d'accueil");
+        }
+        return MaterialPageRoute(builder: (_) => HomeScreen(user: user));
+      case quizRouter:
+        final args = settings.arguments as Map<String, dynamic>?;
+        if (args == null ||
+            args['user'] == null ||
+            args['user'] is! UserModel) {
+          return _errorRoute(
+            "Paramètres du quiz manquants ou utilisateur non trouvé",
+          );
+        }
         return MaterialPageRoute(
-          builder: (_) => FootQuizPage(),
-          settings: settings,
-        );
-      case quizCultureGeneraleRouter:
-        return MaterialPageRoute(
-          builder: (_) => const CultureGeneraleQuizPage(),
-          settings: settings,
-        );
-      case quizCuisineRouter:
-        return MaterialPageRoute(
-          builder: (_) => const CuisineQuizPage(),
-          settings: settings,
-        );
-      case quizDevWebRouter:
-        return MaterialPageRoute(
-          builder: (_) => const DeveloppementWebQuizPage(),
-          settings: settings,
-        );
-      case quizAnglaisRouter:
-        return MaterialPageRoute(
-          builder: (_) => const AnglaisQuizPage(),
-          settings: settings,
-        );
-      case historyRouter:
-        final user = settings.arguments as UserModel?;
-        return MaterialPageRoute(builder: (_) => HistoryPage(user: user));
-      default:
-        return MaterialPageRoute(
-          builder: (context) => Scaffold(
-            appBar: AppBar(
-              title: const Text('Page Introuvable'),
-              backgroundColor: Colors.red,
-              foregroundColor: Colors.white,
-            ),
-            body: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.error_outline, size: 64, color: Colors.red),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Page Introuvable: ${settings.name}',
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 24),
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.of(context).pushReplacementNamed(loginRouter);
-                    },
-                    child: const Text('Retour à la connexion'),
-                  ),
-                ],
-              ),
-            ),
+          builder: (_) => QuizScreen(
+            title: args['title'] ?? 'Quiz',
+            category: args['category'] ?? '',
+            level: args['difficulty'] ?? 'Facile',
+            questions: args['questions'] ?? [],
+            user: args['user'],
           ),
         );
+      case historyRouter:
+        final user = settings.arguments;
+        if (user == null || user is! UserModel) {
+          return _errorRoute("Utilisateur non trouvé pour l'historique");
+        }
+        return MaterialPageRoute(builder: (_) => HistoryPage(user: user));
+      default:
+        return _errorRoute('404 - Page introuvable');
     }
+  }
+
+  static MaterialPageRoute _errorRoute(String message) {
+    return MaterialPageRoute(
+      builder: (_) => Scaffold(
+        appBar: AppBar(title: const Text('Erreur')),
+        body: Center(child: Text(message)),
+      ),
+    );
   }
 }

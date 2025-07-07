@@ -2,51 +2,55 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../fonctions/database_helper.dart';
 
-class QuizPage extends StatefulWidget { 
+import '../../models/user_model.dart';
+
+
+class QuizScreen extends StatefulWidget {
   final String title;
   final String category;
-  final String difficulty;
+  final String level;
   final List<Map<String, dynamic>> questions;
-  const QuizPage({Key? key, required this.title, required this.category, required this.difficulty, required this.questions}) : super(key: key);
+  final UserModel user;
+  const QuizScreen({Key? key, required this.title, required this.category, required this.level, required this.questions, required this.user}) : super(key: key);
 
   @override
-  State<QuizPage> createState() => _QuizPageState();
+  State<QuizScreen> createState() => _QuizScreenState();
 }
 
-class _QuizPageState extends State<QuizPage> {
-  int currentQuestion = 0;
-  int score = 0;
-  bool answered = false;
-  String? selectedOption;
-  int questionKey = 0;
+class _QuizScreenState extends State<QuizScreen> {
+  int index = 0;
+  int points = 0;
+  bool hasAnswered = false;
+  String? chosenOption;
+  int qKey = 0;
 
-  void checkAnswer(String option) {
-    if (answered) return;
+  void answer(String option) {
+    if (hasAnswered) return;
     setState(() {
-      selectedOption = option;
-      answered = true;
-      if (option == widget.questions[currentQuestion]['answer']) {
-        score++;
+      chosenOption = option;
+      hasAnswered = true;
+      if (option == widget.questions[index]['answer']) {
+        points++;
       }
     });
-    Future.delayed(const Duration(seconds: 1), nextQuestion);
+    Future.delayed(const Duration(seconds: 1), next);
   }
 
-  void nextQuestion() async {
-    if (currentQuestion < widget.questions.length - 1) {
+  void next() async {
+    if (index < widget.questions.length - 1) {
       setState(() {
-        currentQuestion++;
-        answered = false;
-        selectedOption = null;
-        questionKey++;
+        index++;
+        hasAnswered = false;
+        chosenOption = null;
+        qKey++;
       });
     } else {
       final db = DatabaseHelper();
       await db.saveQuizScore(
-        userId: 1,
-        score: score,
+        userId: widget.user.id!,
+        score: points,
         category: widget.category,
-        difficulty: widget.difficulty,
+        difficulty: widget.level,
         datePlayed: DateTime.now().toString(),
       );
       showDialog(
@@ -54,11 +58,10 @@ class _QuizPageState extends State<QuizPage> {
         barrierDismissible: false,
         builder: (_) => AlertDialog(
           title: const Text('Quiz terminé'),
-          content: Text('Votre score : $score / ${widget.questions.length}\nDifficulté : ${widget.difficulty}'),
+          content: Text('Votre score : $points / ${widget.questions.length}\nDifficulté : ${widget.level}'),
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop();
                 Navigator.of(context).pop();
               },
               child: const Text('OK'),
@@ -69,28 +72,9 @@ class _QuizPageState extends State<QuizPage> {
     }
   }
 
-  Color? getOptionColor(String option) {
-    if (!answered) return null;
-    if (option == widget.questions[currentQuestion]['answer']) {
-      return Colors.green;
-    }
-    if (option == selectedOption) {
-      return Colors.red;
-    }
-    return null;
-  }
-
-  Color getTextColor(String option) {
-    final bg = getOptionColor(option);
-    if (bg == Colors.green || bg == Colors.red) {
-      return Colors.white;
-    }
-    return Colors.black;
-  }
-
   @override
   Widget build(BuildContext context) {
-    final q = widget.questions[currentQuestion];
+    final q = widget.questions[index];
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -106,10 +90,10 @@ class _QuizPageState extends State<QuizPage> {
           switchInCurve: Curves.easeIn,
           switchOutCurve: Curves.easeOut,
           transitionBuilder: (child, animation) {
-            return child.animate(key: ValueKey(questionKey)).fadeIn(duration: 400.ms);
+            return child.animate(key: ValueKey(qKey)).fadeIn(duration: 400.ms);
           },
           child: Card(
-            key: ValueKey(questionKey),
+            key: ValueKey(qKey),
             color: Colors.white,
             elevation: 6,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
@@ -123,7 +107,7 @@ class _QuizPageState extends State<QuizPage> {
                       Icon(Icons.quiz, color: Color(0xFFFF0000), size: 28),
                       const SizedBox(width: 8),
                       Text(
-                        'Question ${currentQuestion + 1} / ${widget.questions.length}',
+                        'Question ${index + 1} / ${widget.questions.length}',
                         style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFFFF4C0C)),
                       ),
                     ],
@@ -136,8 +120,8 @@ class _QuizPageState extends State<QuizPage> {
                   const SizedBox(height: 24),
                   ...List.generate(q['options'].length, (i) {
                     final option = q['options'][i];
-                    final isCorrect = answered && option == q['answer'];
-                    final isWrong = answered && option == selectedOption && option != q['answer'];
+                    final isCorrect = hasAnswered && option == q['answer'];
+                    final isWrong = hasAnswered && option == chosenOption && option != q['answer'];
                     return Container(
                       margin: const EdgeInsets.symmetric(vertical: 6),
                       child: ElevatedButton.icon(
@@ -174,7 +158,7 @@ class _QuizPageState extends State<QuizPage> {
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                           elevation: 0,
                         ),
-                        onPressed: () => checkAnswer(option),
+                        onPressed: () => answer(option),
                         label: Text(option, style: const TextStyle(fontSize: 16)),
                       ),
                     );
@@ -185,7 +169,21 @@ class _QuizPageState extends State<QuizPage> {
                     children: [
                       Icon(Icons.emoji_events, color: Color(0xFFFF4C0C)),
                       const SizedBox(width: 6),
-                      Text('Score : $score', style: const TextStyle(fontSize: 18, color: Color(0xFFFF4C0C), fontWeight: FontWeight.bold)),
+                      Text('Score : $points', style: const TextStyle(fontSize: 18, color: Color(0xFFFF4C0C), fontWeight: FontWeight.bold)),
+                      const SizedBox(width: 16),
+                      ElevatedButton.icon(
+                        icon: const Icon(Icons.home, color: Colors.deepOrange),
+                        label: const Text('Accueil'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          foregroundColor: Colors.deepOrange,
+                          side: const BorderSide(color: Colors.deepOrange),
+                          elevation: 0,
+                        ),
+                        onPressed: () {
+                          Navigator.of(context).popUntil((route) => route.isFirst);
+                        },
+                      ),
                     ],
                   ),
                 ],

@@ -4,8 +4,8 @@ import '../../models/score_model.dart';
 import '../../models/user_model.dart';
 
 class HistoryPage extends StatefulWidget {
-  final UserModel? user;
-  const HistoryPage({Key? key, this.user}) : super(key: key);
+  final UserModel user;
+  const HistoryPage({Key? key, required this.user}) : super(key: key);
 
   @override
   State<HistoryPage> createState() => _HistoryPageState();
@@ -22,8 +22,8 @@ class _HistoryPageState extends State<HistoryPage> {
   }
 
   Future<void> _loadScores() async {
-    if (widget.user != null && widget.user!.id != null) {
-      final data = await DatabaseHelper().getScoresByUser(widget.user!.id!);
+    if (widget.user.id != null) {
+      final data = await DatabaseHelper().getScoresByUser(widget.user.id!);
       setState(() {
         _scores = data;
         _isLoading = false;
@@ -54,7 +54,7 @@ class _HistoryPageState extends State<HistoryPage> {
                       leading: const Icon(Icons.emoji_events),
                       title: Row(
                         children: [
-                          Expanded(child: Text('${s.category} - ${s.score}/5 pts')),
+                          Expanded(child: Text('${s.category} - ${s.score} pts')),
                           Chip(
                             label: Text(s.difficulty),
                             backgroundColor: s.difficulty == 'Facile'
